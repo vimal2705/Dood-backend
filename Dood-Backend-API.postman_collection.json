@@ -1,0 +1,1552 @@
+{
+  "info": {
+    "name": "Dood Backend API",
+    "description": "Complete API collection for Dood Backend with Authentication, Dreams, Actions, and Tasks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"username\": \"johndoe\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"9999999999\",\n  \"dob\": \"1990-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Request password reset OTP to be sent to email"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify OTP and Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify-otp-and-reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "verify-otp-and-reset"
+              ]
+            },
+            "description": "Verify OTP and reset password"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (with header)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get current logged-in user details using Authorization header"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User with Token (in body)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me-with-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me-with-token"
+              ]
+            },
+            "description": "Get user details by sending token in request body"
+          },
+          "response": []
+        }
+      ],
+      "description": "User authentication endpoints"
+    },
+    {
+      "name": "Dreams",
+      "item": [
+        {
+          "name": "Create Dream",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Learn Web Development\",\n  \"subTitle\": \"Master MERN Stack\",\n  \"description\": \"Complete a full MERN stack course and build projects\",\n  \"type\": \"work\",\n  \"priority\": \"high\",\n  \"status\": \"in progress\",\n  \"image\": \"https://example.com/image.jpg\",\n  \"targetDate\": \"2024-12-31\",\n  \"notes\": \"Focus on React and Node.js\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams"
+              ]
+            },
+            "description": "Create a new dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Dreams",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams"
+              ]
+            },
+            "description": "Get all dreams for current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Dreams with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams?type=work&status=in progress&priority=high&sortBy=priority",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "work",
+                  "description": "Filter by type: work, achievement, relation, finance, home"
+                },
+                {
+                  "key": "status",
+                  "value": "in progress",
+                  "description": "Filter by status: in progress, slow down, boosted"
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "description": "Filter by priority: low, medium, high, top"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "priority",
+                  "description": "Sort by: priority, timeline, targetDate, progress, createdAt"
+                }
+              ]
+            },
+            "description": "Get all dreams with filtering and sorting options"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Dream",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams/dreamId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams",
+                "dreamId"
+              ]
+            },
+            "description": "Get a single dream by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Dream",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"status\": \"boosted\",\n  \"progress\": 70,\n  \"priority\": \"high\",\n  \"notes\": \"Updated notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams/dreamId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams",
+                "dreamId"
+              ]
+            },
+            "description": "Update dream (any field can be updated)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Dream Progress",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 75\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams/dreamId/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams",
+                "dreamId",
+                "progress"
+              ]
+            },
+            "description": "Update only the progress of a dream (0-100)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Dream",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams/dreamId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams",
+                "dreamId"
+              ]
+            },
+            "description": "Delete a dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dream Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dreams/stats/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dreams",
+                "stats",
+                "summary"
+              ]
+            },
+            "description": "Get dreams statistics and summary for current user"
+          },
+          "response": []
+        }
+      ],
+      "description": "Dream management endpoints"
+    },
+    {
+      "name": "Actions",
+      "item": [
+        {
+          "name": "Create Action (with Dream)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Learn React Basics\",\n  \"description\": \"Complete first 5 chapters of React course\",\n  \"priority\": \"high\",\n  \"status\": \"in progress\",\n  \"dueDate\": \"2024-04-15\",\n  \"dreamId\": \"dreamIdHere\",\n  \"notes\": \"Focus on hooks and state management\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions"]
+            },
+            "description": "Create action linked to a dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Standalone Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Standalone Action\",\n  \"description\": \"Action not linked to any dream\",\n  \"priority\": \"medium\",\n  \"status\": \"not started\",\n  \"dueDate\": \"2024-04-10\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions"]
+            },
+            "description": "Create standalone action (without dream link)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Actions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions"]
+            },
+            "description": "Get all actions for current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Actions with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions?status=in progress&priority=high&sortBy=dueDate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions"],
+              "query": [
+                {"key": "status", "value": "in progress"},
+                {"key": "priority", "value": "high"},
+                {"key": "sortBy", "value": "dueDate"}
+              ]
+            },
+            "description": "Get actions with filtering and sorting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Action",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/actionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "actionId"]
+            },
+            "description": "Get a single action by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Actions for Dream",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/dream/dreamId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "dream", "dreamId"]
+            },
+            "description": "Get all actions for specific dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Action",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"status\": \"in progress\",\n  \"priority\": \"high\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/actionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "actionId"]
+            },
+            "description": "Update action details"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Action Completed",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/actionId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "actionId", "complete"]
+            },
+            "description": "Mark action as completed"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Action",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/actionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "actionId"]
+            },
+            "description": "Delete an action"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Action Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/actions/stats/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "actions", "stats", "summary"]
+            },
+            "description": "Get action statistics"
+          },
+          "response": []
+        }
+      ],
+      "description": "Action management - Actions can be linked to dreams or standalone"
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task (Standalone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Buy groceries\",\n  \"description\": \"Buy milk, eggs, bread\",\n  \"priority\": \"medium\",\n  \"dueDate\": \"2024-03-28\",\n  \"estimatedTime\": 30,\n  \"notes\": \"From local market\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"]
+            },
+            "description": "Create standalone task (no action or dream)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Task for Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Write introduction\",\n  \"description\": \"Write 500 word introduction\",\n  \"priority\": \"high\",\n  \"actionId\": \"actionIdHere\",\n  \"dueDate\": \"2024-03-27\",\n  \"estimatedTime\": 60\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"]
+            },
+            "description": "Create task linked to specific action"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Task for Dream",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Setup development environment\",\n  \"description\": \"Install Node.js and dependencies\",\n  \"priority\": \"high\",\n  \"dreamId\": \"dreamIdHere\",\n  \"dueDate\": \"2024-03-27\",\n  \"estimatedTime\": 45\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"]
+            },
+            "description": "Create task linked directly to dream (without action)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"]
+            },
+            "description": "Get all tasks for current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks?isCompleted=false&priority=high&sortBy=dueDate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {"key": "isCompleted", "value": "false"},
+                {"key": "priority", "value": "high"},
+                {"key": "sortBy", "value": "dueDate"}
+              ]
+            },
+            "description": "Get tasks with filtering and sorting (isCompleted, priority, actionId, dreamId, sortBy)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Task",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/taskId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "taskId"]
+            },
+            "description": "Get a single task by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks for Action",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/action/actionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "action", "actionId"]
+            },
+            "description": "Get all tasks for specific action"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks for Dream",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/dream/dreamId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "dream", "dreamId"]
+            },
+            "description": "Get all tasks for specific dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"priority\": \"high\",\n  \"estimatedTime\": 90,\n  \"notes\": \"Updated notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/taskId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "taskId"]
+            },
+            "description": "Update task details"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Task Completion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/taskId/toggle",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "taskId", "toggle"]
+            },
+            "description": "Toggle task completion status (marks as complete/incomplete)"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Time Spent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minutes\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/taskId/add-time",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "taskId", "add-time"]
+            },
+            "description": "Add time spent on task (in minutes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/taskId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "taskId"]
+            },
+            "description": "Delete a task"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/stats/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tasks", "stats", "summary"]
+            },
+            "description": "Get task statistics and summary"
+          },
+          "response": []
+        }
+      ],
+      "description": "Task management - Tasks can be standalone, linked to actions, or linked to dreams"
+    },
+    {
+      "name": "Ideas",
+      "item": [
+        {
+          "name": "Create Idea (Standalone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mobile app redesign\",\n  \"description\": \"Redesign mobile app UI/UX for better user experience\",\n  \"priority\": \"high\",\n  \"category\": \"Product\",\n  \"tags\": [\"design\", \"mobile\", \"ui\"],\n  \"notes\": \"Collaborate with design team\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas"]
+            },
+            "description": "Create standalone idea (not linked to dream)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Idea for Dream",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Use React hooks\",\n  \"description\": \"Implement React hooks pattern for state management\",\n  \"priority\": \"medium\",\n  \"dreamId\": \"dreamIdHere\",\n  \"category\": \"Development\",\n  \"tags\": [\"react\", \"hooks\", \"frontend\"],\n  \"notes\": \"Can improve performance\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas"]
+            },
+            "description": "Create idea linked to specific dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Ideas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas"]
+            },
+            "description": "Get all ideas for current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ideas with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas?status=active&priority=high&sortBy=priority",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas"],
+              "query": [
+                {"key": "status", "value": "active"},
+                {"key": "priority", "value": "high"},
+                {"key": "sortBy", "value": "priority"}
+              ]
+            },
+            "description": "Get ideas with filtering and sorting (status, priority, dreamId, sortBy)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Idea",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/ideaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "ideaId"]
+            },
+            "description": "Get a single idea by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ideas for Dream",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/dream/dreamId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "dream", "dreamId"]
+            },
+            "description": "Get all ideas for specific dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Idea",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Idea Title\",\n  \"priority\": \"high\",\n  \"status\": \"active\",\n  \"implementation\": \"Plan detailed implementation steps\",\n  \"tags\": [\"updated\", \"v2\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/ideaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "ideaId"]
+            },
+            "description": "Update idea details"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Idea as Implemented",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/ideaId/implement",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "ideaId", "implement"]
+            },
+            "description": "Mark idea status as implemented"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Idea",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/ideaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "ideaId"]
+            },
+            "description": "Delete an idea"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Idea Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ideas/stats/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ideas", "stats", "summary"]
+            },
+            "description": "Get idea statistics and summary"
+          },
+          "response": []
+        }
+      ],
+      "description": "Idea management - Ideas can be standalone or linked to dreams"
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Create Note (Standalone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a standalone note\",\n  \"linkedType\": \"standalone\",\n  \"tags\": [\"important\", \"todo\"],\n  \"isPinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create standalone note (not linked to any resource)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note for Dream",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Important note for this dream\",\n  \"linkedType\": \"dream\",\n  \"linkedId\": \"dreamIdHere\",\n  \"tags\": [\"dream\", \"reminder\"],\n  \"isPinned\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create note linked to specific dream"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note for Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Additional details for this action\",\n  \"linkedType\": \"action\",\n  \"linkedId\": \"actionIdHere\",\n  \"tags\": [\"action\", \"details\"],\n  \"isPinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create note linked to specific action"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note for Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Task related notes and comments\",\n  \"linkedType\": \"task\",\n  \"linkedId\": \"taskIdHere\",\n  \"tags\": [\"task\", \"progress\"],\n  \"isPinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create note linked to specific task"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note for Idea",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Thoughts and insights about this idea\",\n  \"linkedType\": \"idea\",\n  \"linkedId\": \"ideaIdHere\",\n  \"tags\": [\"idea\", \"feedback\"],\n  \"isPinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Create note linked to specific idea"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Notes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes"]
+            },
+            "description": "Get all notes for current user (both standalone and linked)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Standalone Notes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/standalone/list",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "standalone", "list"]
+            },
+            "description": "Get all standalone notes (not linked to any resource)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notes by Resource Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/dream/dreamIdHere",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "dream", "dreamIdHere"]
+            },
+            "description": "Get all notes for specific resource (replace 'dream' with action, task, or idea)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Note",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/noteId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "noteId"]
+            },
+            "description": "Get a single note by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated note content\",\n  \"tags\": [\"updated\", \"important\"],\n  \"isPinned\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/noteId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "noteId"]
+            },
+            "description": "Update note content, tags, and pin status"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Pin Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/noteId/toggle-pin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "noteId", "toggle-pin"]
+            },
+            "description": "Toggle note pin status (pin/unpin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/noteId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "noteId"]
+            },
+            "description": "Delete a note"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Note Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notes/stats/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notes", "stats", "summary"]
+            },
+            "description": "Get note statistics and summary"
+          },
+          "response": []
+        }
+      ],
+      "description": "Note management - Notes can be standalone or linked to dreams, actions, tasks, and ideas"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "description": "Base URL for the API (change for production)"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here",
+      "description": "JWT token obtained from login or signup. Replace with actual token."
+    }
+  ]
+}
