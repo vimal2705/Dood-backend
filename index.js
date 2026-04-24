@@ -8,6 +8,7 @@ const actionRoutes = require("./routes/actionRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const ideaRoutes = require("./routes/ideaRoutes");
 const noteRoutes = require("./routes/noteRoutes");
+const moodEnergyRoutes = require("./routes/moodEnergyRoutes");
 
 // Initialize app
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/actions", actionRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/mood-energy", moodEnergyRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
