@@ -57,6 +57,12 @@ const dreamSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    actions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Action',
+      },
+    ],
   },
   { timestamps: true }
 );

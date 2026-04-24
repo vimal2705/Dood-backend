@@ -2,6 +2,12 @@ const Action = require('../models/Action');
 const Dream = require('../models/Dream');
 const { validationResult } = require('express-validator');
 
+const normalizeObjectId = (value) => {
+  if (!value) return null;
+  if (typeof value === 'object' && value._id) return String(value._id);
+  return String(value);
+};
+
 // @desc    Create a new action
 // @route   POST /api/actions
 // @access  Private
@@ -34,6 +40,13 @@ exports.createAction = async (req, res) => {
     });
 
     await action.save();
+
+    if (action.dreamId) {
+      await Dream.updateOne(
+        { _id: action.dreamId, userId: req.user.id },
+        { $addToSet: { actions: action._id } }
+      );
+    }
     await action.populate('dreamId', 'title subTitle priority status');
 
     res.status(201).json({
@@ -173,9 +186,12 @@ exports.updateAction = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Action not found' });
     }
 
+    const previousDreamId = normalizeObjectId(action.dreamId);
+    const nextDreamId = dreamId === undefined ? previousDreamId : normalizeObjectId(dreamId);
+
     // If dreamId is being changed, verify new dream belongs to user
-    if (dreamId && dreamId !== action.dreamId.toString()) {
-      const dream = await Dream.findOne({ _id: dreamId, userId: req.user.id });
+    if (dreamId && nextDreamId !== previousDreamId) {
+      const dream = await Dream.findOne({ _id: nextDreamId, userId: req.user.id });
       if (!dream) {
         return res.status(404).json({ success: false, message: 'Dream not found or does not belong to you' });
       }
@@ -193,10 +209,25 @@ exports.updateAction = async (req, res) => {
       }
     }
     if (dueDate !== undefined) action.dueDate = dueDate;
-    if (dreamId !== undefined) action.dreamId = dreamId || null;
+    if (dreamId !== undefined) action.dreamId = nextDreamId || null;
     if (notes !== undefined) action.notes = notes;
 
     await action.save();
+
+    if (nextDreamId !== previousDreamId) {
+      if (previousDreamId) {
+        await Dream.updateOne(
+          { _id: previousDreamId, userId: req.user.id },
+          { $pull: { actions: action._id } }
+        );
+      }
+      if (nextDreamId) {
+        await Dream.updateOne(
+          { _id: nextDreamId, userId: req.user.id },
+          { $addToSet: { actions: action._id } }
+        );
+      }
+    }
     await action.populate('dreamId', 'title subTitle priority status');
 
     res.status(200).json({
@@ -222,6 +253,14 @@ exports.deleteAction = async (req, res) => {
 
     if (!action) {
       return res.status(404).json({ success: false, message: 'Action not found' });
+    }
+
+    const linkedDreamId = normalizeObjectId(action.dreamId);
+    if (linkedDreamId) {
+      await Dream.updateOne(
+        { _id: linkedDreamId, userId: req.user.id },
+        { $pull: { actions: action._id } }
+      );
     }
 
     res.status(200).json({
