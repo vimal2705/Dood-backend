@@ -1,7 +1,18 @@
-const Task = require('../models/Task');
-const Action = require('../models/Action');
-const Dream = require('../models/Dream');
-const { validationResult } = require('express-validator');
+const Task = require("../models/Task");
+const Action = require("../models/Action");
+const { validationResult } = require("express-validator");
+
+const normalizeObjectId = (value) => {
+  if (!value) return null;
+  if (typeof value === "object" && value._id) return String(value._id);
+  return String(value);
+};
+
+const areDatesEqual = (a, b) => {
+  const aTime = a ? new Date(a).getTime() : null;
+  const bTime = b ? new Date(b).getTime() : null;
+  return aTime === bTime;
+};
 
 // @desc    Create a new task
 // @route   POST /api/tasks
@@ -13,51 +24,60 @@ exports.createTask = async (req, res) => {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { title, description, priority, dueDate, actionId, dreamId, notes, estimatedTime } = req.body;
+    const {
+      title,
+      date,
+      status,
+      priority,
+      isCompleted,
+      completedDate,
+      actionId,
+      inputs,
+    } = req.body;
 
-    // Verify action belongs to user (if provided)
     if (actionId) {
-      const action = await Action.findOne({ _id: actionId, userId: req.user.id });
+      const action = await Action.findOne({
+        _id: actionId,
+        userId: req.user.id,
+      });
       if (!action) {
-        return res.status(404).json({ success: false, message: 'Action not found or does not belong to you' });
-      }
-    }
-
-    // Verify dream belongs to user (if provided)
-    if (dreamId) {
-      const dream = await Dream.findOne({ _id: dreamId, userId: req.user.id });
-      if (!dream) {
-        return res.status(404).json({ success: false, message: 'Dream not found or does not belong to you' });
-      }
-    }
-
-    // If actionId is provided, override dreamId with action's dreamId (if it has one)
-    let finalDreamId = dreamId;
-    if (actionId) {
-      const action = await Action.findById(actionId);
-      if (action.dreamId) {
-        finalDreamId = action.dreamId;
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message: "Action not found or does not belong to you",
+          });
       }
     }
 
     const task = new Task({
       userId: req.user.id,
       title,
-      description,
-      priority: priority || 'medium',
-      dueDate,
+      date,
+      status: status || "not started",
+      priority: priority || "medium",
+      isCompleted: isCompleted || status === "completed",
+      completedDate:
+        completedDate ||
+        (isCompleted || status === "completed" ? new Date() : null),
       actionId: actionId || null,
-      dreamId: finalDreamId || null,
-      notes,
-      estimatedTime,
+      inputs,
     });
 
     await task.save();
-    await task.populate(['actionId', 'dreamId']);
+
+    if (task.actionId) {
+      await Action.updateOne(
+        { _id: task.actionId, userId: req.user.id },
+        { $addToSet: { tasks: task._id } },
+      );
+    }
+
+    await task.populate("actionId", "title deadlineDate");
 
     res.status(201).json({
       success: true,
-      message: 'Task created successfully',
+      message: "Task created successfully",
       task,
     });
   } catch (error) {
@@ -71,49 +91,69 @@ exports.createTask = async (req, res) => {
 // @access  Private
 exports.getAllTasks = async (req, res) => {
   try {
-    const { isCompleted, priority, actionId, dreamId, sortBy } = req.query;
+    const {
+      status,
+      priority,
+      isCompleted,
+      actionId,
+      sortBy,
+      date,
+      dateFrom,
+      dateTo,
+    } = req.query;
 
-    // Build filter object
     const filter = { userId: req.user.id };
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+    if (isCompleted !== undefined) filter.isCompleted = isCompleted === "true";
+    if (actionId) filter.actionId = actionId;
 
-    if (isCompleted !== undefined) {
-      filter.isCompleted = isCompleted === 'true';
-    }
-    if (priority) {
-      filter.priority = priority;
-    }
-    if (actionId) {
-      filter.actionId = actionId;
-    }
-    if (dreamId) {
-      filter.dreamId = dreamId;
+    // Date-wise filter
+    if (date) {
+      const start = new Date(date);
+      start.setUTCHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setUTCHours(23, 59, 59, 999);
+      filter.date = { $gte: start, $lte: end };
+    } else if (dateFrom || dateTo) {
+      filter.date = {};
+      if (dateFrom) filter.date.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const end = new Date(dateTo);
+        end.setUTCHours(23, 59, 59, 999);
+        filter.date.$lte = end;
+      }
     }
 
-    // Build sort object
-    let sortObject = { dueDate: 1, createdAt: -1 }; // Default: by due date
+    let sortObject = { date: 1, createdAt: -1 };
     if (sortBy) {
       switch (sortBy) {
-        case 'priority':
+        case "title":
+          sortObject = { title: 1 };
+          break;
+        case "date":
+          sortObject = { date: 1 };
+          break;
+        case "priority":
           sortObject = { priority: 1 };
           break;
-        case 'dueDate':
-          sortObject = { dueDate: 1 };
+        case "status":
+          sortObject = { status: 1 };
           break;
-        case 'completed':
+        case "completed":
           sortObject = { isCompleted: 1 };
           break;
-        case 'newest':
-          sortObject = { createdAt: -1 };
+        case "updatedAt":
+          sortObject = { updatedAt: -1 };
           break;
         default:
-          sortObject = { dueDate: 1, createdAt: -1 };
+          sortObject = { date: 1, createdAt: -1 };
       }
     }
 
     const tasks = await Task.find(filter)
       .sort(sortObject)
-      .populate('actionId', 'title priority status')
-      .populate('dreamId', 'title subTitle priority status');
+      .populate("actionId", "title deadlineDate");
 
     res.status(200).json({
       success: true,
@@ -134,12 +174,12 @@ exports.getTaskById = async (req, res) => {
     const task = await Task.findOne({
       _id: req.params.id,
       userId: req.user.id,
-    })
-      .populate('actionId', 'title priority status')
-      .populate('dreamId', 'title subTitle priority status');
+    }).populate("actionId", "title deadlineDate");
 
     if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
     res.status(200).json({
@@ -159,15 +199,16 @@ exports.getTasksByAction = async (req, res) => {
   try {
     const { actionId } = req.params;
 
-    // Verify action belongs to user
     const action = await Action.findOne({ _id: actionId, userId: req.user.id });
     if (!action) {
-      return res.status(404).json({ success: false, message: 'Action not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Action not found" });
     }
 
     const tasks = await Task.find({ actionId, userId: req.user.id })
-      .sort({ dueDate: 1 })
-      .populate('dreamId', 'title subTitle');
+      .sort({ date: 1 })
+      .populate("actionId", "title deadlineDate");
 
     res.status(200).json({
       success: true,
@@ -181,155 +222,127 @@ exports.getTasksByAction = async (req, res) => {
   }
 };
 
-// @desc    Get tasks for specific dream
-// @route   GET /api/tasks/dream/:dreamId
-// @access  Private
-exports.getTasksByDream = async (req, res) => {
-  try {
-    const { dreamId } = req.params;
-
-    // Verify dream belongs to user
-    const dream = await Dream.findOne({ _id: dreamId, userId: req.user.id });
-    if (!dream) {
-      return res.status(404).json({ success: false, message: 'Dream not found' });
-    }
-
-    const tasks = await Task.find({ dreamId, userId: req.user.id })
-      .sort({ dueDate: 1 })
-      .populate('actionId', 'title priority status');
-
-    res.status(200).json({
-      success: true,
-      count: tasks.length,
-      dreamTitle: dream.title,
-      tasks,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 // @desc    Update task
 // @route   PUT /api/tasks/:id
 // @access  Private
 exports.updateTask = async (req, res) => {
   try {
-    const { title, description, priority, dueDate, actionId, dreamId, notes, estimatedTime, timeSpent } = req.body;
+    const {
+      title,
+      date,
+      status,
+      priority,
+      isCompleted,
+      completedDate,
+      actionId,
+      inputs,
+      deadlineChangeReason,
+    } = req.body;
 
-    // Find task
-    let task = await Task.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
-
-    if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
-    }
-
-    // If actionId is being changed, verify new action belongs to user
-    if (actionId && actionId !== task.actionId?.toString()) {
-      const action = await Action.findOne({ _id: actionId, userId: req.user.id });
-      if (!action) {
-        return res.status(404).json({ success: false, message: 'Action not found or does not belong to you' });
-      }
-    }
-
-    // If dreamId is being changed, verify new dream belongs to user
-    if (dreamId && dreamId !== task.dreamId?.toString()) {
-      const dream = await Dream.findOne({ _id: dreamId, userId: req.user.id });
-      if (!dream) {
-        return res.status(404).json({ success: false, message: 'Dream not found or does not belong to you' });
-      }
-    }
-
-    // Update fields
-    if (title !== undefined) task.title = title;
-    if (description !== undefined) task.description = description;
-    if (priority !== undefined) task.priority = priority;
-    if (dueDate !== undefined) task.dueDate = dueDate;
-    if (actionId !== undefined) task.actionId = actionId || null;
-    if (dreamId !== undefined) task.dreamId = dreamId || null;
-    if (notes !== undefined) task.notes = notes;
-    if (estimatedTime !== undefined) task.estimatedTime = estimatedTime;
-    if (timeSpent !== undefined) task.timeSpent = timeSpent;
-
-    await task.save();
-    await task.populate(['actionId', 'dreamId']);
-
-    res.status(200).json({
-      success: true,
-      message: 'Task updated successfully',
-      task,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// @desc    Toggle task completion status
-// @route   PUT /api/tasks/:id/toggle
-// @access  Private
-exports.toggleTaskCompletion = async (req, res) => {
-  try {
     const task = await Task.findOne({
       _id: req.params.id,
       userId: req.user.id,
     });
 
     if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
-    // Toggle completion
-    task.isCompleted = !task.isCompleted;
+    const previousActionId = normalizeObjectId(task.actionId);
+    const nextActionId =
+      actionId === undefined ? previousActionId : normalizeObjectId(actionId);
 
-    // Set or unset completion date
-    if (task.isCompleted) {
+    if (nextActionId && nextActionId !== previousActionId) {
+      const action = await Action.findOne({
+        _id: nextActionId,
+        userId: req.user.id,
+      });
+      if (!action) {
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message: "Action not found or does not belong to you",
+          });
+      }
+    }
+
+    if (date !== undefined && !areDatesEqual(task.date, date)) {
+      if (!deadlineChangeReason || !String(deadlineChangeReason).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Reason is required when task date is changed",
+        });
+      }
+
+      task.deadlineChanges.push({
+        previousDate: task.date || null,
+        newDate: date || null,
+        reason: String(deadlineChangeReason).trim(),
+        changedAt: new Date(),
+      });
+    }
+
+    if (title !== undefined) task.title = title;
+    if (date !== undefined) task.date = date;
+    if (priority !== undefined) task.priority = priority;
+    if (status !== undefined) task.status = status;
+    if (isCompleted !== undefined) task.isCompleted = isCompleted;
+    if (completedDate !== undefined) task.completedDate = completedDate || null;
+    if (actionId !== undefined) task.actionId = nextActionId || null;
+    if (inputs !== undefined) task.inputs = inputs;
+
+    if (status === "completed") {
+      task.isCompleted = true;
+      if (!task.completedDate) {
+        task.completedDate = new Date();
+      }
+    } else if (
+      status !== undefined &&
+      status !== "completed" &&
+      isCompleted === undefined &&
+      completedDate === undefined
+    ) {
+      task.isCompleted = false;
+      task.completedDate = null;
+    }
+
+    if (isCompleted === true && !task.completedDate) {
       task.completedDate = new Date();
-    } else {
+    }
+
+    if (
+      isCompleted === false &&
+      completedDate === undefined &&
+      status !== "completed"
+    ) {
       task.completedDate = null;
     }
 
     await task.save();
-    await task.populate(['actionId', 'dreamId']);
+
+    if (nextActionId !== previousActionId) {
+      if (previousActionId) {
+        await Action.updateOne(
+          { _id: previousActionId, userId: req.user.id },
+          { $pull: { tasks: task._id } },
+        );
+      }
+      if (nextActionId) {
+        await Action.updateOne(
+          { _id: nextActionId, userId: req.user.id },
+          { $addToSet: { tasks: task._id } },
+        );
+      }
+    }
+
+    await task.populate("actionId", "title deadlineDate");
 
     res.status(200).json({
       success: true,
-      message: `Task marked as ${task.isCompleted ? 'completed' : 'not completed'}`,
-      task,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// @desc    Add time spent on task
-// @route   PUT /api/tasks/:id/add-time
-// @access  Private
-exports.addTimeSpent = async (req, res) => {
-  try {
-    const { minutes } = req.body;
-
-    if (!minutes || minutes < 0) {
-      return res.status(400).json({ success: false, message: 'Please provide valid minutes' });
-    }
-
-    const task = await Task.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      { $inc: { timeSpent: minutes } },
-      { new: true, runValidators: true }
-    ).populate(['actionId', 'dreamId']);
-
-    if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: `Added ${minutes} minutes to task`,
+      message: "Task updated successfully",
       task,
     });
   } catch (error) {
@@ -349,12 +362,22 @@ exports.deleteTask = async (req, res) => {
     });
 
     if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
+    }
+
+    const linkedActionId = normalizeObjectId(task.actionId);
+    if (linkedActionId) {
+      await Action.updateOne(
+        { _id: linkedActionId, userId: req.user.id },
+        { $pull: { tasks: task._id } },
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: 'Task deleted successfully',
+      message: "Task deleted successfully",
       taskId: task._id,
     });
   } catch (error) {
@@ -372,14 +395,13 @@ exports.getTaskStats = async (req, res) => {
 
     const stats = {
       totalTasks: tasks.length,
+      byStatus: {},
+      byPriority: {},
+      linkedToAction: 0,
+      standAlone: 0,
       completedTasks: 0,
       incompleteTasks: 0,
-      byPriority: {},
-      standalone: 0,
-      linkedToAction: 0,
-      linkedToDream: 0,
-      totalTimeSpent: 0,
-      averageTimePerTask: 0,
+      totalInputStories: 0,
       overdue: 0,
     };
 
@@ -387,37 +409,30 @@ exports.getTaskStats = async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     tasks.forEach((task) => {
+      stats.byStatus[task.status] = (stats.byStatus[task.status] || 0) + 1;
+      stats.byPriority[task.priority] =
+        (stats.byPriority[task.priority] || 0) + 1;
+
       if (task.isCompleted) {
         stats.completedTasks++;
       } else {
         stats.incompleteTasks++;
       }
 
-      // Count by priority
-      stats.byPriority[task.priority] = (stats.byPriority[task.priority] || 0) + 1;
-
-      // Count by link type
       if (task.actionId) {
         stats.linkedToAction++;
-      } else if (task.dreamId) {
-        stats.linkedToDream++;
       } else {
-        stats.standalone++;
+        stats.standAlone++;
       }
 
-      // Sum time spent
-      stats.totalTimeSpent += task.timeSpent;
+      stats.totalInputStories += Array.isArray(task.inputs)
+        ? task.inputs.length
+        : 0;
 
-      // Count overdue
-      if (task.dueDate && task.dueDate < today && !task.isCompleted) {
+      if (task.date && task.date < today && !task.isCompleted) {
         stats.overdue++;
       }
     });
-
-    // Calculate average time
-    if (tasks.length > 0) {
-      stats.averageTimePerTask = Math.round(stats.totalTimeSpent / tasks.length);
-    }
 
     res.status(200).json({
       success: true,

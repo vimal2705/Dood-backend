@@ -1,66 +1,89 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+
+const linkedTypeToModelMap = {
+  dream: "Dream",
+  action: "Action",
+  task: "Task",
+  idea: "Idea",
+};
 
 const noteSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User ID is required'],
-      index: true
+      ref: "User",
+      required: [true, "User ID is required"],
+      index: true,
     },
     content: {
       type: String,
-      required: [true, 'Please provide note content'],
+      required: [true, "Please provide note content"],
       trim: true,
-      maxlength: [1000, 'Note cannot be more than 1000 characters'],
+      maxlength: [1000, "Note cannot be more than 1000 characters"],
+    },
+    title: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Title cannot be more than 120 characters"],
+      default: "Untitled Note",
     },
     linkedType: {
       type: String,
-      enum: ['dream', 'action', 'task', 'idea', 'standalone'],
-      default: 'standalone',
-      required: true
+      enum: ["dream", "action", "task", "idea", "standalone"],
+      default: "standalone",
+      required: true,
     },
     linkedId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,
-      refPath: 'linkedType',
+      ref: function () {
+        return linkedTypeToModelMap[this.linkedType] || null;
+      },
       validate: {
-        validator: function(value) {
+        validator: function (value) {
           // If linkedType is not 'standalone', linkedId must exist
-          if (this.linkedType !== 'standalone' && !value) {
+          if (this.linkedType !== "standalone" && !value) {
             return false;
           }
           // If linkedType is 'standalone', linkedId should be null
-          if (this.linkedType === 'standalone' && value) {
+          if (this.linkedType === "standalone" && value) {
             return false;
           }
           return true;
         },
-        message: 'linkedId must be provided for linked notes and null for standalone notes'
-      }
+        message:
+          "linkedId must be provided for linked notes and null for standalone notes",
+      },
     },
     tags: [
       {
         type: String,
         trim: true,
-        maxlength: 50
-      }
+        maxlength: 50,
+      },
     ],
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
     isPinned: {
       type: Boolean,
-      default: false
+      default: false,
     },
     timeline: {
       type: Date,
-      default: Date.now
-    }
+      default: Date.now,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes for better query performance
 noteSchema.index({ userId: 1, linkedType: 1 });
 noteSchema.index({ userId: 1, linkedId: 1 });
+noteSchema.index({ userId: 1, title: 1 });
+noteSchema.index({ userId: 1, priority: 1 });
 noteSchema.index({ userId: 1, isPinned: 1 });
 noteSchema.index({ linkedType: 1, linkedId: 1 });
 
@@ -69,15 +92,18 @@ noteSchema.pre(/^find/, function (next) {
   if (this.options._recursed) {
     return next();
   }
-  
+
   // Only populate if linkedId exists
-  if (this._conditions && (this._conditions.linkedId || this._conditions['linkedId'])) {
+  if (
+    this._conditions &&
+    (this._conditions.linkedId || this._conditions["linkedId"])
+  ) {
     this.populate({
-      path: 'linkedId',
-      select: 'title subTitle name content',
+      path: "linkedId",
+      select: "title name content",
     });
   }
   next();
 });
 
-module.exports = mongoose.model('Note', noteSchema);
+module.exports = mongoose.model("Note", noteSchema);

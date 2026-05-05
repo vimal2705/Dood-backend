@@ -1,70 +1,70 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const dreamSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User ID is required'],
+      ref: "User",
+      required: [true, "User ID is required"],
     },
     title: {
       type: String,
-      required: [true, 'Please provide a dream title'],
+      required: [true, "Please provide a dream title"],
       trim: true,
-      maxlength: [100, 'Title cannot be more than 100 characters'],
-    },
-    subTitle: {
-      type: String,
-      required: [true, 'Please provide a dream subtitle'],
-      trim: true,
-      maxlength: [200, 'Subtitle cannot be more than 200 characters'],
+      maxlength: [100, "Title cannot be more than 100 characters"],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: [1000, 'Description cannot be more than 1000 characters'],
+      maxlength: [1000, "Description cannot be more than 1000 characters"],
     },
-    image: {
+    plan: {
       type: String,
+      trim: true,
+      maxlength: [5000, "Plan cannot be more than 5000 characters"],
+    },
+    imageUrl: {
+      type: String,
+      trim: true,
       default: null,
     },
     priority: {
       type: String,
-      enum: ['low', 'medium', 'high', 'top'],
-      default: 'medium',
+      enum: ["low", "medium", "high", "top"],
+      default: "medium",
     },
     type: {
       type: String,
-      enum: ['work', 'achievement', 'relation', 'finance', 'home'],
-      required: [true, 'Please specify dream type'],
+      enum: ["work", "achievement", "relation", "finance", "home"],
+      required: [true, "Please specify dream type"],
     },
     status: {
       type: String,
-      enum: ['in progress', 'slow down', 'boosted'],
-      default: 'in progress',
+      enum: ["in progress", "slow down", "boosted"],
+      default: "in progress",
     },
-    timeline: {
-      type: Date,
-      default: Date.now,
-    },
-    targetDate: {
-      type: Date,
-      default: null,
-    },
-    progress: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
+    inputs: [
+      {
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        story: {
+          type: String,
+          required: [true, "Input story is required"],
+          trim: true,
+          maxlength: [2000, "Input story cannot be more than 2000 characters"],
+        },
+      },
+    ],
     actions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Action',
+        ref: "Action",
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for better query performance
@@ -73,17 +73,17 @@ dreamSchema.index({ userId: 1, type: 1 });
 dreamSchema.index({ userId: 1, status: 1 });
 
 // Middleware to ensure only one "top" priority dream per user
-dreamSchema.pre('save', async function (next) {
+dreamSchema.pre("save", async function (next) {
   // Only proceed if priority is being changed to "top"
-  if (this.priority === 'top' && this.isModified('priority')) {
-    const Dream = mongoose.model('Dream');
+  if (this.priority === "top" && this.isModified("priority")) {
+    const Dream = mongoose.model("Dream");
     // Remove "top" priority from all other dreams of this user
     await Dream.updateMany(
-      { userId: this.userId, _id: { $ne: this._id }, priority: 'top' },
-      { priority: 'high' }
+      { userId: this.userId, _id: { $ne: this._id }, priority: "top" },
+      { priority: "high" },
     );
   }
   next();
 });
 
-module.exports = mongoose.model('Dream', dreamSchema);
+module.exports = mongoose.model("Dream", dreamSchema);
